@@ -1,6 +1,6 @@
 import tornado.web            
 import tornado.ioloop        # thread waiting for result
-
+import json
 
 class basicRequestHandler(tornado.web.RequestHandler):
     def get(self):
@@ -23,6 +23,20 @@ class resourceParamRequestHandler(tornado.web.RequestHandler):
     def get(self,studentname, corseid):
         self.write(f'welcome {studentname}, the course is {corseid}')
 
+class jsonlistRequestHandler(tornado.web.RequestHandler):
+    def get(self):
+        file = open('list.txt', 'r')
+        numbers = file.read().splitlines()
+        file.close()
+        self.write(json.dumps(numbers)) 
+    
+    def post(self):
+        number = self.get_argument('number')
+        numbers = open('list.txt', 'a')
+        numbers.write(f'{number}\n')
+        numbers.close()
+        self.write(json.dumps({'message':'added successfully'}))
+
 
 if __name__ == '__main__':
     app = tornado.web.Application([
@@ -30,6 +44,9 @@ if __name__ == '__main__':
         (r"/animal", listRequestHandler),
         (r"/iseven", queryParamRequestHandler),
         (r'/student/([a-z]+)/([0-9]+)', resourceParamRequestHandler), 
+        
+        (r"/list", jsonlistRequestHandler),
+
     ])
     
     port = 8882
